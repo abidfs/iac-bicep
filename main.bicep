@@ -101,6 +101,7 @@ module appServicesWebApp 'modules/webapp.bicep' = {
         { name: 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', value: 'false' }
       ]
     }
+    frontDoorId: frontDoor.outputs.id
     managedIdentityId: managedIdentityCms.outputs.id
     vnetIntegrationSubnetId: vnet.outputs.vnetIntegrationSubnetId
   }
@@ -121,5 +122,20 @@ module privateDnsZoneKeyvault 'modules/private-dns.bicep' = {
     dnsZoneName: 'privatelink.vaultcore.azure.net'
     virtualNetworkId: vnet.outputs.virtualNetworkId
     virtualNetworkName: vnet.name
+  }
+}
+
+module frontDoor 'modules/front-door.bicep' = {
+  name: 'front-door'
+  params: {
+    resourcePrefix: resourcePrefix
+  }
+}
+
+module frontDoorEndpoint 'modules/front-door-endpoint.bicep' = {
+  name: 'front-door-endpoint'
+  params: {
+    hostName: appServicesWebApp.outputs.appUrl
+    resourcePrefix: resourcePrefix
   }
 }
