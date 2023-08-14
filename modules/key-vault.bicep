@@ -4,11 +4,13 @@ param privateEndpointsSubnetId string
 param privateDnsZoneId string
 param tenantId string
 param principalId string
-// param outboundIpAddresses array
 @description('Specifies all secrets {"name":"","value":""} wrapped in a secure object.')
 @secure()
 param secretsObject object
 
+// https://learn.microsoft.com/en-us/azure/templates/microsoft.keyvault/vaults
+// https://learn.microsoft.com/en-us/azure/key-vault/general/private-link-diagnostics
+// https://github.com/MicrosoftDocs/azure-docs/issues/52649#issuecomment-648318286
 resource keyVault 'Microsoft.KeyVault/vaults@2023-02-01' = {
   name: '${resourcePrefix}-kv'
   location: location
@@ -26,15 +28,6 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-02-01' = {
           id: privateEndpointsSubnetId
         }
       ]
-      // ipRules: [for outboundIpAddress in outboundIpAddresses: {
-      //   value: outboundIpAddress
-      // }
-      // ]
-      // [
-      //     {
-      //       value: subnetIpRange
-      //     }
-      //   ]
     }
     publicNetworkAccess: 'Disabled'
     softDeleteRetentionInDays: 7
@@ -45,18 +38,6 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-02-01' = {
     tenantId: tenantId
   }
 }
-
-// resource keyVaultPrivateDnsZoneName_link_to_virtualNetwork 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2018-09-01' = {
-//   parent: keyVaultPrivateDnsZone
-//   name: 'link_to_${toLower(virtualNetworkName)}'
-//   location: 'global'
-//   properties: {
-//     registrationEnabled: false
-//     virtualNetwork: {
-//       id: vnetId
-//     }
-//   }
-// }
 
 resource keyVaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-04-01' = {
   name: '${resourcePrefix}-keyvault-private-endpoint'
@@ -98,43 +79,6 @@ resource keyVaultPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/private
     ]
   }
 }
-
-//----------------Option1
-// resource symbolicname 'Microsoft.KeyVault/vaults/privateEndpointConnections@2022-07-01' = {
-//   name: '${resourcePrefix}-keyvault-private-endpoint'
-//   parent: keyVault
-//   properties: {
-//     privateEndpoint: {}
-//     privateLinkServiceConnectionState: {
-//       actionsRequired: 'None'
-//       description: 'Approved as part of infrastructure automation'
-//       status: 'Approved'
-//     }
-//     provisioningState: 'Succeeded'
-//   }
-// }
-
-//---------------Option2
-// resource keyVaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2022-01-01' = {
-//   name: '${resourcePrefix}-keyvault-private-endpoint'
-//   location: location
-//   properties: {
-//     privateLinkServiceConnections: [
-//       {
-//         name: '${resourcePrefix}-keyvault-private-endpoint'
-//         properties: {
-//           groupIds: [
-//             'vault'
-//           ]
-//           privateLinkServiceId: keyVault.id
-//         }
-//       }
-//     ]
-//     subnet: {
-//       id: privateEndpointsSubnetId
-//     }
-//   }
-// }
 
 // @description('This is the built-in Key Vault Administrator role. See https://docs.microsoft.com/azure/role-based-access-control/built-in-roles#key-vault-administrator')
 resource roleAssignmentMi 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
