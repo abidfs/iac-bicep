@@ -3,7 +3,7 @@ param resourcePrefix string = uniqueString(resourceGroup().id)
 param tenantId string = subscription().tenantId
 
 module vnet 'modules/vnet.bicep' = {
-  name: 'module-vnet'
+  name: 'vnet'
   params: {
     location: location
     resourcePrefix: resourcePrefix
@@ -11,7 +11,7 @@ module vnet 'modules/vnet.bicep' = {
 }
 
 module managedIdentityCms 'modules/managed-identity.bicep' = {
-  name: 'module-managed-identities'
+  name: 'managed-identity-cms'
   params: {
     location: location
     resourcePrefix: resourcePrefix
@@ -27,7 +27,7 @@ module managedIdentityCms 'modules/managed-identity.bicep' = {
 // }
 
 module keyVault 'modules/key-vault.bicep' = {
-  name: 'module-keyvault'
+  name: 'keyvault'
   params: {
     location: location
     resourcePrefix: resourcePrefix
@@ -54,7 +54,7 @@ resource keyVaultRef 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
 }
 
 module mysqlDatabaseServer 'modules/mysql-db.bicep' = {
-  name: 'module-mysql-database'
+  name: 'mysql-database'
   params: {
     location: location
     resourcePrefix: resourcePrefix
@@ -65,8 +65,8 @@ module mysqlDatabaseServer 'modules/mysql-db.bicep' = {
   }
 }
 
-module appServicesPlan 'modules/app-service-plan.bicep' = {
-  name: 'module-app-service-plan'
+module appServicePlan 'modules/app-service-plan.bicep' = {
+  name: 'app-service-plan'
   params: {
     location: location
     resourcePrefix: resourcePrefix
@@ -74,14 +74,14 @@ module appServicesPlan 'modules/app-service-plan.bicep' = {
 }
 
 module appServicesWebApp 'modules/webapp.bicep' = {
-  name: 'module-app-services-web-app-cms'
+  name: 'app-services-web-app-cms'
   dependsOn: [
     privateDnsZoneKeyvault
   ]
   params: {
     location: location
     resourcePrefix: resourcePrefix
-    appServicePlanId: appServicesPlan.outputs.id
+    appServicePlanId: appServicePlan.outputs.id
     appContainerImage: 'abidfs1/strapi-cms:d93c076b79ded7e027f37da7ff7ca3fb4ff3d435'
     appSettings: {
       nameValuePairs: [
