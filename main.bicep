@@ -18,14 +18,6 @@ module managedIdentityCms 'modules/managed-identity.bicep' = {
   }
 }
 
-// // ADMIN_JWT_SECRET API_TOKEN_SALT APP_KEYS JWT_SECRET TRANSFER_TOKEN_SALT
-// module randomStringGenerator 'modules/random-string-generator.bicep' = {
-//   name: 'random-string-generator'
-//   params: {
-//     location: location
-//   }
-// }
-
 module keyVault 'modules/key-vault.bicep' = {
   name: 'keyvault'
   params: {
